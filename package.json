@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/DariusRain/Importer/issues"
   },
-  "homepage": "https://github.com/DariusRain/Importer#readme"
+  "homepage": "https://github.com/DariusRain/Importer#readme",
+  "dependencies": {
+    "mongoose": "^5.10.9",
+    "validator": "^13.1.17"
+  }
 }
