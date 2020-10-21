@@ -4,7 +4,7 @@ const fs = require("fs"),
   {separateBizs} = require("./utils/bizHandlers"),
   approvedDate = new Date(2020, 2, 2),
   validationCode = 'DARIUS20',
-  dataPath = './allBizsRaw.json',
+  dataPath = './data/allBizsRaw.json',
   report = {
     total: 0,
     adresses: 0,
@@ -83,7 +83,7 @@ const fs = require("fs"),
   
   separateBizs(separatedBizs);
   finalizeReport();
-  fs.writeFileSync('allParsedData.json', JSON.stringify(allBizs))
+  fs.writeFileSync('./data/allParsedData.json', JSON.stringify(allBizs))
 
 };
 function writeReport(biz) {
@@ -106,7 +106,7 @@ function writeReport(biz) {
 }
 
 function finalizeReport() {
-  fs.writeFileSync("report.json", JSON.stringify(report));
+  fs.writeFileSync("./data/report.json", JSON.stringify(report));
 }
 
 parseBiz()
