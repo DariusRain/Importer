@@ -6,4 +6,4 @@
     to be stored on either a local machine "[MongoDB Local](https://www.mongodb.com/try/download/community)" or the cloud [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
 
 ###### How it works
-    Compile > Write new Raw Data File > Parses/Validates > Write new Parsed Data File
+    Compile > Write new raw data file > Parses/Validates > Write new parsed data file > import new parsed data file
