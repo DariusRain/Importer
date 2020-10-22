@@ -1,6 +1,6 @@
 const fs = require("fs");
 let allBizs = [];
-let fileNames = fs.readdirSync("scraped");
+let fileNames = fs.readdirSync("./data/scraped/");
 
 module.exports = () => {
     // let count = 0;
