@@ -1,3 +1,6 @@
-module.exports = () => {
-  return "TO-DO";
+class Importer {
+  constructor() {
+    
+  }
 }
+module.exports = Importer;
