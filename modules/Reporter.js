@@ -1,4 +1,5 @@
 const fs = require("fs");
+
 class Reporter {
     total = 0;
     addresses = 0;
