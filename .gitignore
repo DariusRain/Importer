@@ -2,3 +2,4 @@ parser_js.js
 scraped/
 node_modules/
 data/
+static/

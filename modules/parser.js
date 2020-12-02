@@ -17,10 +17,8 @@ class Parser {
   reporter = new Reporter();
   dataPath = './data/allBizsRaw.json';
 
-  constructor(defaultBiz, validationCode, approvedDate) {
+  constructor(defaultBiz) {
     this.defaultBiz = defaultBiz;
-    this.validationCode = validationCode;
-    this.approvedDate = approvedDate;
   }
 
   getRawDataArr() {
@@ -41,14 +39,16 @@ class Parser {
 
       this.reporter.write(bizParsedData);
       this.reporter.increment("parsed");
+      
       const {
         name, phone, streetName,
         streetNumber, city, state,
         zipcode, about, email,
         website, type, categories,
-        photos, openHour, closeHour } = bizParsedData;
+        openHour, closeHour } = bizParsedData;
 
-      console.log(3, { name, phone, streetName, streetNumber, city, state, zipcode, about, email, website, type, categories, photos, openHour, closeHour })
+      console.log(3, { name, phone, streetName, streetNumber, city, state, zipcode, about, email, website, type, categories, openHour, closeHour })
+      
       this.allBizs.push({
         ...this.defaultBiz,
         business_type: type,
@@ -65,7 +65,7 @@ class Parser {
         state: state,
         zipcode: zipcode,
         about: about,
-        photos: photos,
+        // photos: photos,
       });
 
 
