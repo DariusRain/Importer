@@ -4,6 +4,7 @@ const Biz = require("./Biz");
 const addressParser = require("parse-address");
 const fs = require("fs"),
   { separateBizs } = require("../utils/bizHandlers"),
+  { parseWeirdAddr } = require("../utils/parsers"),
   { default: validate } = require("validator");
 
 String.prototype.toProperCase = function () {
@@ -138,7 +139,7 @@ class Parser {
           break;
         case 'address':
           addressCount += 1;
-          const parsedAddr = this.parseAdd(cntData);
+          const parsedAddr = this.parseAdd(parseWeirdAddr(1, cntData));
           if (!parsedAddr === false) {
             // separatedBiz = true;
             // const {city, state, zipcode, streetName} = parsedAddr;

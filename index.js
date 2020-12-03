@@ -9,9 +9,9 @@ const compiler = new Compiler(compilePath),
     parser = new Parser(defaultBiz);
 
 
-// compile()
+// compiler.compile()
 
-    parser.exec();
+parser.exec();
 
 // import()
 
