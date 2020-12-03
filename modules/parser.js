@@ -4,6 +4,7 @@ const Biz = require("./Biz");
 const addressParser = require("parse-address");
 const fs = require("fs"),
   { separateBizs } = require("../utils/bizHandlers"),
+  { parseWeirdAddr } = require("../utils/parsers"),
   { default: validate } = require("validator");
 
 String.prototype.toProperCase = function () {
@@ -17,10 +18,8 @@ class Parser {
   reporter = new Reporter();
   dataPath = './data/allBizsRaw.json';
 
-  constructor(defaultBiz, validationCode, approvedDate) {
+  constructor(defaultBiz) {
     this.defaultBiz = defaultBiz;
-    this.validationCode = validationCode;
-    this.approvedDate = approvedDate;
   }
 
   getRawDataArr() {
@@ -41,14 +40,16 @@ class Parser {
 
       this.reporter.write(bizParsedData);
       this.reporter.increment("parsed");
+      
       const {
         name, phone, streetName,
         streetNumber, city, state,
         zipcode, about, email,
         website, type, categories,
-        photos, openHour, closeHour } = bizParsedData;
+        openHour, closeHour } = bizParsedData;
 
-      console.log(3, { name, phone, streetName, streetNumber, city, state, zipcode, about, email, website, type, categories, photos, openHour, closeHour })
+      console.log(3, { name, phone, streetName, streetNumber, city, state, zipcode, about, email, website, type, categories, openHour, closeHour })
+      
       this.allBizs.push({
         ...this.defaultBiz,
         business_type: type,
@@ -65,7 +66,7 @@ class Parser {
         state: state,
         zipcode: zipcode,
         about: about,
-        photos: photos,
+        // photos: photos,
       });
 
 
@@ -138,7 +139,7 @@ class Parser {
           break;
         case 'address':
           addressCount += 1;
-          const parsedAddr = this.parseAdd(cntData);
+          const parsedAddr = this.parseAdd(parseWeirdAddr(1, cntData));
           if (!parsedAddr === false) {
             // separatedBiz = true;
             // const {city, state, zipcode, streetName} = parsedAddr;

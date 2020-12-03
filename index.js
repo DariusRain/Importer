@@ -1,17 +1,17 @@
 const Compiler = require("./modules/Compiler"),
     Importer = require("./modules/Importer"),
     Parser = require("./modules/Parser"),
-    bizDefaults = require("./modules/Biz"),
+    defaultBiz = require("./static/defaultBiz"),
     {compilePath} = require("./static/paths");
 
 const compiler = new Compiler(compilePath),
     importer = new Importer(),
-    parser = new Parser();
+    parser = new Parser(defaultBiz);
 
 
-// compile()
+// compiler.compile()
 
-    parser.exec();
+parser.exec();
 
 // import()
 
