@@ -7,24 +7,49 @@ let count = 0;
 function parseWeirdAddr(siteNum, addr) {
     switch(siteNum) {
         case 1:
-            const re = /[a-z|0-9][A-Z]/;
+            // const re = /[a-z|0-9][A-Z]/;
             
+            // let index = addr.search(re);
+            // addr = addr.replace("United States,", "");
+            // addr = addr.substring(0, index + 1) + " " + addr.substring(index + 1, addr.length );
+            // index = addr.search(re);
+            // if (0 < index) {
+            //     parseWeirdAddr(1, addr);
+            // }
+
+            // // if ( count < 100) {
+            // //     console.log(addressParser.parseLocation(addr));
+            // //     console.log(addr);
+            // // }
+            // // count++;
+
+            // // addr = addr.replace("# ", "Apt # ")
+            // return addr;
+            const re = /[a-z|0-9][A-Z]/;
+            // console.log("Before: ", addr)
             let index = addr.search(re);
-            addr = addr.replace("United States,", "");
-            addr = addr.substring(0, index + 1) + " " + addr.substring(index + 1, addr.length );
+            addr = addr.substring(0, index + 1) + ", " + addr.substring(index + 1, addr.length);
+            // console.log("SubStr: ", addr)
             index = addr.search(re);
             if (0 < index) {
-                parseWeirdAddr(1, addr);
+                return parseWeirdAddr(1, addr);
             }
-
-            // if ( count < 100) {
-            //     console.log(addressParser.parseLocation(addr));
-            //     console.log(addr);
-            // }
-            // count++;
-
-            // addr = addr.replace("# ", "Apt # ")
-            return addr;
+            const addArr = addr.split(" ");
+            const zip = addArr[addArr.length-1];
+            if (zip.length == 5 && zip.search(/[a-zA-Z]/) ) {
+                // console.log(zip);
+                const stateFull = getState(zip, true);
+                addr = addr.replace("United States", getState(zip) )///[United States]/i
+                addr = addr.replace(stateFull+",", "");
+            }
+            addr = addr.replace(" # ", " ").replace(/\s[0-9]+,\s/, ", ");
+            // console.log(addr.split(","));
+            addressArr = addr.split(",").filter(str=>str!="");
+            // console.log(addressArr);
+            if (addressArr.length == 3) {
+                addressArr.splice(1, 0, "nocity");
+                addr = addressArr.join(",");
+            }
 
         default:
             console.log("Invalid argument @utils.parsers#parseWeirdAddr(int siteNumber)");
