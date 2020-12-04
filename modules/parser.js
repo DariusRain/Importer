@@ -48,7 +48,8 @@ class Parser {
         streetNumber, city, state,
         zipcode, about, email,
         website, type, categories,
-        openHour, closeHour } = bizParsedData;
+        openHour, closeHour, 
+        originalAddress } = bizParsedData;
 
       // console.log(3, { name, phone, streetName, streetNumber, city, state, zipcode, about, email, website, type, categories, openHour, closeHour })
       
@@ -68,6 +69,9 @@ class Parser {
         state: state,
         zipcode: zipcode,
         about: about,
+        //keeping the original address in for testing and refrence, 
+        //will be ignored in the import process
+        og_addr: originalAddress
         // photos: photos,
       });
 
@@ -158,6 +162,7 @@ class Parser {
           dataObj.facebook = this.parseWeb(cntData);
           break;
         case 'address':
+          dataObj.originalAddress = cntData;
           addressCount += 1;
           this.reporter.increment("totalAddr")
           const parsedAddr = this.parseAdd(parseWeirdAddr(1, cntData));
