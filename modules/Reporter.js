@@ -4,7 +4,9 @@ class Reporter {
 
     constructor() {
         this.total = 0;
-        this.addresses = 0;
+        this.totalAddr = 0;
+        this.passedAddr = 0;
+        this.failedAddr = 0;
         this.phone = 0;
         this.email = 0;
         this.photos = 0;
