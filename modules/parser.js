@@ -1,5 +1,5 @@
 
-const Reporter = require(".//Reporter");
+const Reporter = require("./Reporter");
 const Biz = require("./Biz");
 const addressParser = require("parse-address");
 const fs = require("fs"),
@@ -48,7 +48,7 @@ class Parser {
         website, type, categories,
         openHour, closeHour } = bizParsedData;
 
-      console.log(3, { name, phone, streetName, streetNumber, city, state, zipcode, about, email, website, type, categories, openHour, closeHour })
+      // console.log(3, { name, phone, streetName, streetNumber, city, state, zipcode, about, email, website, type, categories, openHour, closeHour })
       
       this.allBizs.push({
         ...this.defaultBiz,
@@ -77,24 +77,22 @@ class Parser {
 
 
   parseBiz(biz) {
-    // console.log(biz.contact);
     let skip = false;
     let dataObj = new Biz();
     if (biz.description !== undefined && biz.description.trim() !== '') {
       dataObj.about = this.parseDesc(biz.description)
     }
     if (biz.name != undefined) {
-      dataObj.name = biz.name.toProperCase();
-    } else {
-      return false;
-    }
+      dataObj.name = this.parseName(biz.name)
+      // dataObj.name = biz.name.toProperCase(); //GS could not find this method 
+    } 
 
     if (biz.image.includes("png") || biz.image.includes("jpeg")) {
       dataObj.photos.push(biz.image.trim());
     }
     if (biz.hours != undefined && biz.hours.length > 0) {
       let str = biz.hours[0].hours.split("-");
-      console.log(str)
+      // console.log(str)
       if (str.length === 2) {
          this.parseHour(str[0]) != NaN && !this.parseHour(str[1]) != NaN && ( dataObj.openHour = this.parseHour(str[0]) ) && ( dataObj.closeHour = this.parseHour(str[1]) );
       }
@@ -103,14 +101,13 @@ class Parser {
         biz.close_hour = this.defaultBiz.close_hour;
       }
     }
-
-
     let addressCount = 0;
     biz.contact.forEach(info => {
       // console.log(info);
       let cntData = info.value.trim();
       switch (info.type) {
         case 'phone':
+        case 'phoneNumber':
           if (cntData.includes('\n')) {
             cntData = cntData.split('\n')[cntData.split('\n').length - 1]
           }
@@ -118,34 +115,57 @@ class Parser {
           if (tempPhone != undefined && validate.isMobilePhone(tempPhone.trim())) {
             dataObj.phone = tempPhone.trim();
           } else {
-            console.log(`"${cntData}" is not a phone number...`)
+            // console.log(`"${cntData}" is not a phone number...`)
           }
           break;
         case 'e-mail':
+        case 'email':
           if (validate.isEmail(cntData)) {
             dataObj.email = cntData;
           } else {
-            console.log(`"${cntData}" is not an email...`)
+            // console.log(`"${cntData}" is not an email...`)
           }
           break;
-        case 'twitter':
-          dataObj.twitter = cntData
+        case "twitter":
+          temp = temp.toLowerCase();
+          if (temp.indexOf("@") === 0) {
+            temp = `http://www.twitter.com/${temp.substring(1)}`;
+          } else if (temp.indexOf("twitter.com") !== -1) {
+            temp =
+              temp.indexOf("http://") > -1 || temp.indexOf("https://") > -1
+                ? temp
+                : `http://${temp}`;
+          } else {
+            temp = `http://twitter.com/${temp}`;
+          }
+          dataObj.twitter = temp;
           break;
-        case 'instagram':
-          dataObj.instagram = cntData
+        case "instagram":
+          temp = temp.toLowerCase();
+          if (temp.indexOf("instagram.com") !== -1) {
+            temp =
+              temp.indexOf("http://") === -1 && temp.indexOf("https://") === -1
+                ? `http://${temp}`
+                : temp;
+          } else {
+            temp = `http://instagram.com/${temp}`;
+          }
+          dataObj.instagram = temp;
           break;
         case 'facebook':
-          dataObj.facebook = cntData
+          dataObj.facebook = this.parseWeb(cntData);
           break;
         case 'address':
           addressCount += 1;
+          this.reporter.increment("totalAddr")
           const parsedAddr = this.parseAdd(parseWeirdAddr(1, cntData));
           if (!parsedAddr === false) {
             // separatedBiz = true;
             // const {city, state, zipcode, streetName} = parsedAddr;
             dataObj = { ...dataObj, ...parsedAddr };
-            this.reporter.increment("addresses")
+            this.reporter.increment("passedAddr")
           } else {
+            this.reporter.increment("failedAddr")
             // console.log(`"${cntData}" is not a address...`)
             skip = true;
             return false;
@@ -155,33 +175,35 @@ class Parser {
           dataObj.categories = [...cntData.split(",")].filter(cat => cat !== 'Other');
           dataObj.type = dataObj.categories[0];
           break;
+        case 'business_web':
         case 'website':
-          dataObj.website = cntData;
+        case 'web':
+          this.reporter.increment("website")
+          dataObj.website = this.parseWeb(cntData);
           break;
       }
-    });;
+    });
     return skip || addressCount == 0 ? false : dataObj;
   }
 
 
-
-  parseName(str) {
-
-    let parsedName = str.split(' ');
-
-    parsedName = parsedName.map(e => {
-      return this.titleCase(e)
-    });
-
-    parsedName = parsedName.join(' ');
-    return parsedName
-  }
-
   parseHour(str) {
     return parseInt(str.indexOf("0") === 0 ? str.substring(1) : str);
   }
-
-
+  
+  parseName(str) {
+    let parsedName = str.split(' ');
+    parsedName = parsedName.map(e => {
+        return this.titleCase(e)
+    });
+    parsedName = parsedName.join(' ');
+    return parsedName
+  }
+  
+  titleCase(str) {
+    if (str === 'LCC') return str
+    return str.substring(0,1).toUpperCase()+str.substring(1, str.length).toLowerCase()
+  }
 
   parsePhone(str) {
     let parsedPhone = str
@@ -200,15 +222,18 @@ class Parser {
     return parsedPhone
   }
 
-
-
-
   parseDesc(str) {
     const r = /[^a-zA-Z.\, ]/g;
     return str.replace(r, '')
   }
 
-
+  parseWeb(str) {
+    str = str.toLowerCase().trim();
+    const link = str.indexOf("http://") > -1 || str.indexOf("https://") > -1
+      ? str
+      : `https://${str}`;
+    return link;
+  }
 
   // --> Problem area
   parseAdd(str) {
@@ -225,8 +250,8 @@ class Parser {
       streetName += this.ifFalsey(type, true);
       streetName += this.ifFalsey(sec_unit_type, true);
       streetName += this.ifFalsey(sec_unit_num, true);
-      console.log(1, parsedAddress)
-      console.log(2, { city, state, zipcode, streetName, streetNumber })
+      // console.log(1, parsedAddress)
+      // console.log(2, { city, state, zipcode, streetName, streetNumber })
       // console.log({city, state, zipcode, streetName})
       return { city, state, zipcode, streetName, streetNumber };
 
