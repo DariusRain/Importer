@@ -1,60 +1,75 @@
 const addressParser = require("parse-address");
 
 const indexOfRegex = require('./indexOfRegex');
+const {getState} = require('./stateFromZip')
 const stateMap = require("./stateMap");
 
 let count = 0;
 function parseWeirdAddr(siteNum, addr) {
     switch(siteNum) {
         case 1:
-            // const re = /[a-z|0-9][A-Z]/;
-            
-            // let index = addr.search(re);
-            // addr = addr.replace("United States,", "");
-            // addr = addr.substring(0, index + 1) + " " + addr.substring(index + 1, addr.length );
-            // index = addr.search(re);
-            // if (0 < index) {
-            //     parseWeirdAddr(1, addr);
-            // }
-
-            // // if ( count < 100) {
-            // //     console.log(addressParser.parseLocation(addr));
-            // //     console.log(addr);
-            // // }
-            // // count++;
-
-            // // addr = addr.replace("# ", "Apt # ")
-            // return addr;
-            const re = /[a-z|0-9][A-Z]/;
             // console.log("Before: ", addr)
+        
+            const re = /[a-z|0-9][A-Z]/;
             let index = addr.search(re);
-            addr = addr.substring(0, index + 1) + ", " + addr.substring(index + 1, addr.length);
-            // console.log("SubStr: ", addr)
-            index = addr.search(re);
-            if (0 < index) {
-                return parseWeirdAddr(1, addr);
+            while ( index != -1) {
+                addr = addr.substring(0, index + 1) + ", " + addr.substring(index + 1, addr.length);
+                index = addr.search(re);
             }
+
+            addr = addr.replace("United States,", addr.split(",").length == 2 ? "," : "");
+            addr = addr.replace("United States", "");
+            
             const addArr = addr.split(" ");
             const zip = addArr[addArr.length-1];
-            if (zip.length == 5 && zip.search(/[a-zA-Z]/) ) {
-                // console.log(zip);
-                const stateFull = getState(zip, true);
-                addr = addr.replace("United States", getState(zip) )///[United States]/i
-                addr = addr.replace(stateFull+",", "");
+            if (zip.length == 5 && zip.search(/[a-zA-Z]/)==-1 ) {
+                
+                if (addr.split(",").length == 2) {
+                    const state = getState(zip)+",";
+                    addArr.splice(addArr.length-1, 0, ",no city,", state)
+                    addr = addArr.join(" ");
+                } else {
+                    const stateFull = getState(zip, true);
+                    addr = addr.replace(stateFull, getState(zip));                
+                }
+
+            } else if (zip.length == 4 && zip.search(/[a-zA-Z]/)==-1 ) {
+                addArr[addArr.length-1] = "0" + addArr[addArr.length-1];
+                addr = addArr.join(" ");
+               
+            } else {
+                return "";
             }
-            addr = addr.replace(" # ", " ").replace(/\s[0-9]+,\s/, ", ");
-            // console.log(addr.split(","));
+            
+            // addr = addr.replace(" # ", " ").replace(/\s[0-9]+,\s/, ", ");
             addressArr = addr.split(",").filter(str=>str!="");
-            // console.log(addressArr);
+            
             if (addressArr.length == 3) {
                 addressArr.splice(1, 0, "nocity");
                 addr = addressArr.join(",");
             }
 
+            // console.log("After: ", addr)
+            // console.log(addressParser.parseLocation(addr));
+            return addr
         default:
             console.log("Invalid argument @utils.parsers#parseWeirdAddr(int siteNumber)");
     }
 }
+
+//TRY TO GET THESE ALL TO PASS
+// 5317 N 17th StMcAllen, Texas, United States, 78504
+// 236 Massachusetts Avenue, NESuite 201Washington, District Of Columbia, United States, 20002
+// PO Box 5541 New York, New York, United States, 10027
+// 31931 Camino Capistrano # JUnited States, 92675
+
+// parseWeirdAddr(1, "PO Box 5541 New York, New York, United States, 10027")
+// parseWeirdAddr(1, "31931 Camino Capistrano # JUnited States, 92675")
+// parseWeirdAddr(1, "303 Washington St WUnited States, 25309")
+// parseWeirdAddr(1, "N6206 N French Creek RdTaylor, Michigan, United States, 54659")
+// parseWeirdAddr(1, "3504 East Main StreetCollege Park, Georgia, United States, 30337")
+// parseWeirdAddr(1, "8282 S Memorial Dr # 110Tulsa, Oklahoma, United States, 74133")
+// parseWeirdAddr(1, "1845 Highway 126, Oregon, United States, 97439")
 
 
 function finalAddrParse ( addrObj ) {
@@ -115,10 +130,6 @@ function finalAddrParse ( addrObj ) {
     return addrObj;
   
 }
-
-// parseWeirdAddr(1, "3504 East Main StreetCollege Park, Georgia, United States, 30337")
-// parseWeirdAddr(1, "8282 S Memorial Dr # 110Tulsa, Oklahoma, United States, 74133")
-// parseWeirdAddr(1, "1845 Highway 126Florence, Oregon, United States, 97439")
 
 module.exports = {
     parseWeirdAddr,

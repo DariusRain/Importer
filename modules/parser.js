@@ -12,6 +12,7 @@ String.prototype.toProperCase = function () {
   return this.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
 };
 
+
 class Parser {
   allBizs = [];
   separatedBizs = [];
@@ -166,6 +167,7 @@ class Parser {
             dataObj = { ...dataObj, ...parsedAddr };
             this.reporter.increment("passedAddr")
           } else {
+            // console.log(cntData+"\n");
             this.reporter.increment("failedAddr")
             // console.log(`"${cntData}" is not a address...`)
             skip = true;
@@ -195,6 +197,7 @@ class Parser {
   parseName(str) {
     let parsedName = str.split(' ');
     parsedName = parsedName.map(e => {
+        if (e === 'LCC') return e
         return this.titleCase(e)
     });
     parsedName = parsedName.join(' ');
@@ -202,7 +205,6 @@ class Parser {
   }
   
   titleCase(str) {
-    if (str === 'LCC') return str
     return str.substring(0,1).toUpperCase()+str.substring(1, str.length).toLowerCase()
   }
 
@@ -240,6 +242,9 @@ class Parser {
   parseAdd(str) {
     const parsedAddress = addressParser.parseLocation(str);
     // console.log(4, parsedAddress);
+
+    // if (parsedAddress == null) console.log(str); 
+
     if (!parsedAddress === false) {
       let { number, street, type, city, state, zip, sec_unit_type, sec_unit_num } = parsedAddress;
       let zipcode = "", streetName = "", streetNumber = "";
