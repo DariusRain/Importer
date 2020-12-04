@@ -4,9 +4,10 @@ const Biz = require("./Biz");
 const addressParser = require("parse-address");
 const fs = require("fs"),
   { separateBizs } = require("../utils/bizHandlers"),
-  { parseWeirdAddr } = require("../utils/parsers"),
+  { parseWeirdAddr, finalAddrParse } = require("../utils/parsers"),
   { default: validate } = require("validator");
 
+  //this is good but check the parseName methods, it accounts for LCC and does not title case that portion
 String.prototype.toProperCase = function () {
   return this.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
 };
@@ -253,13 +254,14 @@ class Parser {
       // console.log(1, parsedAddress)
       // console.log(2, { city, state, zipcode, streetName, streetNumber })
       // console.log({city, state, zipcode, streetName})
-      return { city, state, zipcode, streetName, streetNumber };
+      return finalAddrParse( { city, state, zipcode, streetName, streetNumber } );
 
     } else {
       return false;
     }
 
   }
+
   done() {
     separateBizs(this.separatedBizs);
     this.reporter.finalize();
