@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/DariusRain/Importer#readme",
   "dependencies": {
+    "json-beautify": "^1.1.1",
     "mongoose": "^5.10.9",
     "parse-address": "^1.1.2",
     "validator": "^13.1.17"

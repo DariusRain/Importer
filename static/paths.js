@@ -1,3 +1,4 @@
 module.exports = {
-    compilePath: "./data/scraped"
+    compilePath: "./data/scraped",
+    parsedDataPath: "./data/allParsedData.json"
 }
